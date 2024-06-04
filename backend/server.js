@@ -10,10 +10,18 @@ const port = 3000;
 
 // Middleware
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors({
+  origin: '*',
+}));
 
 // Initialize SQLite database
-const db = new sqlite3.Database(':memory:');
+const db = new sqlite3.Database(':memory:', (err) => {
+  if (err) {
+    console.error('Failed to connect to database:', err.message);
+  } else {
+    console.log('Connected to the SQLite database.');
+  }
+});
 
 // Create gas stations table
 db.serialize(() => {
@@ -25,7 +33,13 @@ db.serialize(() => {
       longitude REAL,
       source TEXT
     )
-  `);
+  `, (err) => {
+    if (err) {
+      console.error('Failed to create table:', err.message);
+    } else {
+      console.log('Gas stations table created.');
+    }
+  });
 });
 
 // Fetch gas stations from external API and save to database
